@@ -1,59 +1,188 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>UEA - Blogging Site</title>
+		<link href='https://fonts.googleapis.com/css?family=Actor' rel='stylesheet'>
+		<link href='https://fonts.googleapis.com/css?family=ABeeZee' rel='stylesheet'>
+		<meta charset="UTF-8">
+		<title>My Blog</title>
+		<style>
+body {
+	background-color: #dfcdc9;
+}
+
+nav {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 20px;
+	background-color: #dfcdc9;
+}
+
+nav h1 {
+	font-family: 'ABeeZee';font-size: 22px;
+	font-size: 35px;
+	margin: 0;
+}
+
+nav ul {
+	display: flex;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+nav li {
+	margin-left: 20px;
+}
+
+nav a {
+	color: #333;
+	text-decoration: none;
+	font-size: 18px;
+	transition: all 0.3s ease-in-out;
+}
+
+nav a:hover {
+	color: #ff5500;
+}
+
+.btn-login {
+	background-color: #ff5500;
+	color: #fff;
+	padding: 10px 20px;
+	border-radius: 5px;
+	text-transform: uppercase;
+	font-weight: bold;
+	transition: all 0.3s ease-in-out;
+}
+
+.btn-login:hover {
+	background-color: #fff;
+	color: #ff5500;
+	border: 1px solid #ff5500;
+}
+
+main {
+	margin: 20px;
+}
+
+article {
+	font-family: 'Actor';
+	border: 1px solid #5a3136 ;
+	padding: 18px;
+}
+
+article header {
+	margin-bottom: 20px;
+}
+
+article h2 {
+	margin: 0;
+	font-size: 25px;
+}
+
+article p {
+	margin: 0;
+	color: #666;
+	font-size: 20px;
+}
+
+.search-form {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+	
+.search-form input[type="text"] {
+	border: none;
+	border-bottom: 2px solid #ccc;
+	padding: 10px;
+	font-size: 16px;
+	margin-right: 10px;
+	width: 300px;
+	border-radius: 20px;
+	transition: border-bottom-color 0.3s ease-in-out;
+}
+
+.search-form input[type="text"]:focus {
+	outline: none;
+	border-bottom-color:  #322224 ;
+}
+
+.search-button {
+	background-color:  #3d2d2f ;
+	border: none;
+	color: white;
+	padding: 10px 20px;
+	text-align: center;
+	text-decoration: none;
+	display: inline-block;
+	font-size: 16px;
+	margin: 4px 2px;
+	cursor: pointer;
+	border-radius: 20px;
+}
+
+.search-button:hover {
+	background-color:  #201819 ;
+}
+
+		</style>
 	</head>
 	<body>
-		<style>
-			/* Style the navigation bar */
-			.navbar {
-				width: 100%;
-				background-color: #555;
-				overflow: auto;
-				padding-left: 2px;
-				padding-right: 3px;
-				padding: 8px;
-				/* Shadow Effect */
-				box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
-			  	}
-			/* Navbar links */
-			.navbar a {
-				float: left;
-				text-align: center;
-				padding: 10px;
-				margin: 2px;
-				color: white;
-				text-decoration: none;
-				font-size: 18px;
-				}
-			/* Navbar links on mouse-hover */
-			.navbar a:hover {
-				background-color: #000;
-			 	}
-			/* Active navbar links */
-			.active {
-				background-color: #04AA6D;
-				}
-			/* Add responsiveness - it will automatically display the navbar vertically instead of horizontally on screens less than 500 pixels */
-			@media screen and (max-width: 600px) {
-				.navbar a {
-					float: none;
-					display: block;
-					}
-				}
-		</style>
-		<!-- Load an icon library -->
-		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-		<div class="navbar">
-			<a class="active" href="#"><i class="fa fa-fw fa-home"></i> Home</a>
-			<a href="/users/login"><i class="fa fa-fw fa-user"></i>Login</a>
+		<nav>
+			<h1>UEA Students' Blog</h1>
+			<ul>
+				<li><a href="#">Home</a></li>
+				<li><a href="#">About</a></li>
+				<li><a href="#">Contact</a></li>
+				<li><a href="/users/login" class="btn-login">Login</a></li>
+			</ul>
+		</nav>
+		<center>
+			<form class="search-form" id="search-form">
+				<input type="text" name="query" placeholder="Search by People's Name" id="search-input" pattern="^[^<>&]*(?:(?<!-)\/(?!script\b)|(?<!\w)script\b|<|>|\b(?:on\w+|javascript):)*$">
+				<button type="submit" class="search-button">Search</button>
+			</form>
+		</center>
+		<div id="data">
+			<main>
+				<% for (var i = 0; i < form.length; i++) { %>
+				<br>
+				<article>
+					<header>
+						<h2><%= form[i].title %></h2>
+						<p>Posted by <%= form[i].name %> on <%= form[i].short_date %> at <%= form[i].short_time %></p>
+					</header>
+					<p><%= form[i].description %></p>
+				</article>
+				<% } %>
+			</main>
 		</div>
-		<% if (messages.logout_msg) { %>
-		<div>
-			<%= messages.logout_msg %>
-		</div>
-		<% } %>
 	</body>
+	<script>
+		const form = document.getElementById('search-form');
+		const input = document.getElementById('search-input');
+		const results = document.getElementById('data');
+		form.addEventListener('submit', async (event) => {
+			event.preventDefault();
+			const query = input.value;
+			const response = await fetch(`/search?query=${query}`);
+			if (response.ok) {
+				const data = await response.json();
+				const markup = data.map((result) => `<main>
+					<article>
+					<header>
+					<h2>${result.title}<h2>
+					<p>Posted by ${result.name} on ${result.time}</p>
+					</header>
+					<p>${result.description}</p>
+					</article>
+					</mail>`).join('');
+				results.innerHTML = markup;
+			} else {
+				console.error(`Request failed with status ${response.status}`);
+			}
+		});
+	</script>
 </html>

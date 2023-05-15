@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Post Form</title>
+	<style>
+		/* Navigation bar styles */
+		nav {
+			background-color: #333;
+			color: #fff;
+			padding: 10px;
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+		}
+
+		/* post-something icon styles */
+		.post-something {
+			padding: 5px;
+			cursor: pointer;
+		}
+		/* Post form styles */
+		.post-form {
+			display: none;
+			position: fixed;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			background-color: #fff;
+			padding: 20px;
+			box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
+			z-index: 1;
+			text-align: center;
+			max-width: 400px;
+			min-width: 300px;
+		}
+
+		.post-form input[type="text"], .post-form textarea {
+			display: block;
+			margin: 10px 0;
+			padding: 10px;
+			width: 100%;
+			border: 1px solid #ccc;
+			border-radius: 5px;
+			box-sizing: border-box;
+		}
+
+		.post-form button {
+			background-color: #333;
+			color: #fff;
+			padding: 10px;
+			border: none;
+			border-radius: 5px;
+			cursor: pointer;
+		}
+		.alert {
+			padding: 15px;
+			margin-bottom: 20px;
+			border: 1px solid transparent;
+			border-radius: 4px;
+		}
+		.alert-success {
+			color: #3c763d;
+			background-color: #dff0d8;
+			border-color: #d6e9c6;
+		}
+		.logout-button {
+			background-color: #f44336;
+			color: white;
+			border: none;
+			padding: 8px 16px;
+			font-size: 16px;
+			cursor: pointer;
+			border-radius: 4px;
+		}
+		.logout-button:hover {
+			background-color: #d32f2f;
+		}
+	</style>
+</head>
+<body>
+	<nav>
+		<span class="profile-icon">&#128100; Welcome, <%= user %></span>
+		<span class="post-something">Post Something</span>
+		<form action="/users/logout" method="POST">
+			<button id="logoutBtn" type="submit" class="logout-button">Logout</button>
+		</form>
+	</nav>
+	<div id="success-alert" class="alert alert-success" style="display: none;">
+		<strong><%= messages.success_msg %></strong>
+	</div>
+	<div class="post-form">	
+		<form action="/users/dashboard" method="POST">
+			<h2>Say something...</h2>
+			<input id="title" type="text" name="title" placeholder="Title" required>
+			<textarea id="description" name="description" placeholder="Description" required></textarea>
+			<button>Post</button>
+		</form>
+	</div>
+	<% if (messages.error) { %>
+	<div class="alert alert-danger" role="alert">
+		<%= messages.error %>
+	</div>
+	<% } %>
+	<% if (messages.success) { %>
+	<div class="alert alert-success" role="alert">
+		<%= messages.success %>
+	</div>
+	<% } %>
+	<script>
+		// Show the post form when profile icon is clicked
+		document.querySelector('.post-something').addEventListener('click', function() {
+			document.querySelector('.post-form').style.display = 'block';
+		});
+
+		// Hide the post form when the "Post" button is clicked
+		document.querySelector('.post-form button').addEventListener('click', function() {
+			document.querySelector('.post-form').style.display = 'none';
+		});
+		const successAlert = document.getElementById('success-alert');
+		successAlert.style.display = 'block';
+		setTimeout(function() {
+			successAlert.style.display = 'none';
+		}, 10000);
+	</script>
+</body>
+</html>

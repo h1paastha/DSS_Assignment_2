@@ -6,6 +6,9 @@ const flash = require("express-flash");
 const session = require("express-session");
 const randomstring = require('randomstring');
 const bodyParser = require("body-parser");
+const speakeasy = require('speakeasy');
+const QRCode = require('qrcode');
+const cookieParser = require('cookieparser');
 const pg = require('pg');
 require("dotenv").config();
 const app = express();
@@ -15,7 +18,6 @@ initializePassport(passport);
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 app.use(express.urlencoded({ extended: false }));
 app.set("view engine", "ejs");
-///////////////////////////////////////////////////////////////////////////////////////////////////////
 app.use(
 	session({
 		secret: process.env.SESSION_SECRET,
@@ -23,13 +25,12 @@ app.use(
 		saveUninitialized: false
 	})
 );
-////////////////////////////////////////////////////////////////////////////////////////////////////////
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 app.get("/", (req, res) => {
-	res.render('index');
+	res.redirect("/users/index");
 });
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 app.get("/users/register", checkAuthenticated, (req, res) => {
@@ -41,17 +42,11 @@ app.get("/users/login", checkAuthenticated, (req, res) => {
 	res.render("login.ejs");
 });
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-app.post('/users/logout', function(req, res, next) {
+app.get('/users/logout', function(req, res, next) {
 	req.logout(function(err) {
 		if (err) { return next(err); }
-		req.flash("logout_msg", "You have successfully logged out!");
-		res.render("index.ejs");
+		res.redirect("/users/index");
 	});
-});
-////////////////////////////////////////////////////////////////////////////////////////////////////////
-app.get("/users/dashboard", checkNotAuthenticated, (req, res) => {
-	console.log('req.isAuthenticated:', req.isAuthenticated(), 'req.session.flash:', req.session.flash);
-	res.render("dashboard.ejs", {user: req.user.name});
 });
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 app.post("/users/register", async (req, res) => {
@@ -105,6 +100,10 @@ app.post("/users/login",
 app.post("/users/dashboard", (req, res) => {
 	const { title, description } = req.body;
 	const personName = req.user.name;
+	const token = req.csrfToken();
+	if (req.body._csrf !== token) {
+		return res.status(403).send('CSRF token invalid');
+	}
 	pool.query('INSERT INTO posts (title, description, name) VALUES ($1, $2, $3)',
 		[title, description, personName], (err, result) => {
 	if (err) { 
@@ -116,16 +115,27 @@ app.post("/users/dashboard", (req, res) => {
 	});
 });
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//app.get('/users/dashboard', (req, res) => {
-//	const query = 'SELECT * FROM posts';
-//	pool.query(query, (err, res) => {
-//		if (err) throw err;
-//		console.log(res.rows);
-//		res.render("index", { forms: res.rows });
-//		req.flash('success', `Post Details: ${post.title}, ${post.description}, ${post.name}`);
-//		res.render('index.ejs', { post });
-//});
-//});  
+app.get('/users/index', (req, res) => {
+	const query = 'SELECT title, description, name, to_char(date, \'DD-Mon-YYYY\') AS short_date, to_char(time, \'HH:MM\') AS short_time FROM posts';
+	pool.query(query, (err, response) => {
+		console.log(response.rows);
+		res.render("index.ejs", {form: response.rows}); 
+	});
+});
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+app.get('/users/dashboard', checkNotAuthenticated, (req, res) => {
+	pool.query('SELECT title, description, to_char(date, \'DD-Mon-YYYY\') AS short_date, to_char(time, \'HH:MM\') AS short_time FROM posts WHERE name = $1', [req.user.name], (err, result) => {
+		console.log(result.rows);
+		res.render('dashboard', {form: result.rows, user: req.user.name});
+	});
+});
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+app.get('/search', async (req, res) => {
+	const { query } = req.query; 
+	const result = await pool.query('SELECT * FROM posts WHERE name ILIKE $1', [`%${query}%`]);
+	console.log(result.rows);
+	res.json(result.rows);
+});
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 function checkAuthenticated(req, res, next) {
 	if (req.isAuthenticated()) {
